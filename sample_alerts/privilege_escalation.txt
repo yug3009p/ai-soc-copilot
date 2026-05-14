@@ -1,0 +1,49 @@
+=== SIEM ALERT: Privilege Escalation — User Added to Domain Admins ===
+Alert Time : 2024-01-15 11:15:47 UTC
+Source Host: DC01.corp.local
+Alert Rule : Non-admin account added to privileged group (Domain Admins / Enterprise Admins)
+
+--- Windows Security Event Log ---
+2024-01-15 11:15:33 EventCode=4728
+  Subject Account Name : CORP\helpdesk_user01
+  Subject Account SID  : S-1-5-21-3847823-482734823-847234-1105
+  Target Group         : CN=Domain Admins,CN=Users,DC=corp,DC=local
+  New Member SID       : S-1-5-21-3847823-482734823-847234-1105
+  New Member Account   : CORP\helpdesk_user01
+  Domain Controller    : DC01.corp.local
+
+2024-01-15 11:15:35 EventCode=4672 (Special Privileges Assigned to New Logon)
+  Account Name  : helpdesk_user01
+  Logon ID      : 0x4A7F2C
+  Privileges    :
+    SeDebugPrivilege
+    SeTakeOwnershipPrivilege
+    SeLoadDriverPrivilege
+    SeBackupPrivilege
+    SeRestorePrivilege
+    SeImpersonatePrivilege
+
+2024-01-15 11:15:41 EventCode=4624 (Successful Logon with elevated token)
+  Account Name  : helpdesk_user01
+  Logon Type    : 10 (RemoteInteractive / RDP)
+  Source IP     : 10.0.5.212
+  Logon ID      : 0x4A7F2C
+
+--- Pre-Escalation Activity on DC01 ---
+2024-01-15 11:08:12 helpdesk_user01 authenticated to DC01 via RDP from 10.0.5.212
+2024-01-15 11:09:44 Process: net.exe "net group 'Domain Admins' helpdesk_user01 /add /domain"
+2024-01-15 11:10:02 Process: whoami /all
+2024-01-15 11:10:18 Process: net localgroup administrators
+2024-01-15 11:11:35 File access: C:\Windows\NTDS\ntds.dit (READ ATTEMPT — access denied)
+2024-01-15 11:14:57 Process: vssadmin create shadow /for=C: (Volume Shadow Copy — potential NTDS dump)
+
+--- Account Context ---
+helpdesk_user01 baseline role     : Tier-1 Help Desk (standard user + local admin on workstations)
+Authorized to access DC01         : NO
+helpdesk_user01 password reset    : 2024-01-14 17:43 (yesterday — possible credential compromise)
+Originating IP 10.0.5.212         : WORKSTATION-19 (unassigned — normally used by contractor)
+IT ticket for this change         : NONE FOUND
+
+--- Related Events ---
+2024-01-15 10:58:03 EventCode=4625 helpdesk_user01 failed login on DC01 (2 attempts)
+2024-01-15 11:00:17 EventCode=4624 helpdesk_user01 successful login on DC01 from 10.0.5.212

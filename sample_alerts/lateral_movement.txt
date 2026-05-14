@@ -1,0 +1,46 @@
+=== SIEM ALERT: Lateral Movement Detected — PsExec / SMB Propagation ===
+Alert Time : 2024-01-15 13:44:08 UTC
+Origin Host: COMPROMISED-WS01.corp.local (10.10.5.23)
+Alert Rule : Single host initiating authenticated SMB sessions + PSEXESVC service install on 4+ hosts in 5 min
+
+--- Attack Progression ---
+13:39:02  COMPROMISED-WS01  EventCode=4624  jdoe logged in (Logon Type 10 / RDP) from 185.220.101.42 [TOR exit node]
+13:39:44  COMPROMISED-WS01  Process: whoami, ipconfig /all, net view, net group "Domain Admins" /domain
+13:40:12  COMPROMISED-WS01  Process: cmd.exe → net use \\10.10.5.24\IPC$ /user:CORP\jdoe [CORP\jdoe is Domain Admin]
+13:40:29  COMPROMISED-WS01  Process: PsExec64.exe \\10.10.5.24 -s cmd.exe
+
+--- Lateral Movement Events (SMB + PsExec) ---
+Target 1: WORKSTATION-24.corp.local (10.10.5.24)
+  13:40:31  EventCode=7045  Service installed: PSEXESVC  ImagePath=C:\Windows\PSEXESVC.exe  StartType=Demand  Account=LocalSystem
+  13:40:32  EventCode=4624  Logon Type=3  Account=CORP\jdoe  Source=10.10.5.23
+  13:40:35  EventCode=4688  Process=cmd.exe  Parent=PSEXESVC.exe  CommandLine="cmd.exe /c whoami && ipconfig"
+
+Target 2: WORKSTATION-25.corp.local (10.10.5.25)
+  13:41:14  EventCode=7045  Service installed: PSEXESVC
+  13:41:15  EventCode=4624  Logon Type=3  Account=CORP\jdoe  Source=10.10.5.23
+  13:41:19  EventCode=4688  Process=cmd.exe  CommandLine="cmd.exe /c net localgroup administrators"
+
+Target 3: FILESERVER02.corp.local (10.10.5.26)  ← FILE SERVER
+  13:42:48  EventCode=7045  Service installed: PSEXESVC
+  13:42:49  EventCode=4624  Logon Type=3  Account=CORP\jdoe  Source=10.10.5.23
+  13:42:55  EventCode=4688  Process=cmd.exe  CommandLine="cmd.exe /c dir \\FILESERVER02\Finance /s"
+  13:43:04  EventCode=4663  Object access: \\FILESERVER02\Finance\Payroll\2024\ (READ, 847 files)
+  13:43:44  robocopy.exe \\FILESERVER02\Finance\ C:\Users\Public\staging\ /E /COPYALL
+
+Target 4: BACKUP-SRV01.corp.local (10.10.5.30)  ← BACKUP SERVER
+  13:44:01  EventCode=7045  Service installed: PSEXESVC
+  13:44:02  EventCode=4624  Logon Type=3  Account=CORP\jdoe  Source=10.10.5.23
+  13:44:07  EventCode=4688  Process=cmd.exe  CommandLine="cmd.exe /c vssadmin list shadows"
+
+--- Network Summary ---
+Source          : COMPROMISED-WS01 (10.10.5.23)
+Protocol        : SMB (TCP 445)
+Targets reached : 4 hosts in 4 minutes 35 seconds
+Credentials used: CORP\jdoe (Domain Admin — likely harvested via credential dumping)
+Initial access  : RDP from 185.220.101.42 (TOR exit node — identity obfuscation)
+
+--- Impact Assessment ---
+Files accessed  : 847 files in \\FILESERVER02\Finance\Payroll\2024\
+Data staged     : C:\Users\Public\staging\ on COMPROMISED-WS01 (~2.3 GB)
+Backup server   : Accessed — potential ransomware pre-positioning
+Accounts at risk: Any credential cached on COMPROMISED-WS01 (Mimikatz likely used offline)

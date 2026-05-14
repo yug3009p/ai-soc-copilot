@@ -1,0 +1,42 @@
+=== SIEM ALERT: Suspected DNS Data Exfiltration ===
+Alert Time : 2024-01-15 16:47:03 UTC
+Source Host: ACCOUNTING-PC-03.corp.local (10.0.0.52)
+User       : CORP\mwilson
+Alert Rule : >20 DNS queries with subdomain length >30 chars to single external domain in 10 min
+
+--- Firewall / DNS Log Entries ---
+2024-01-15 16:37:04 DNS QUERY src=10.0.0.52 dst=8.8.8.8:53 proto=UDP qname=dGhpcy1pcy10aGUtZmlyc3QtY2h1bms.exfil-c2.xyz type=A ALLOWED
+2024-01-15 16:37:08 DNS QUERY src=10.0.0.52 dst=8.8.8.8:53 proto=UDP qname=b2YtY29uZmlkZW50aWFsLWZpbGUtY29u.exfil-c2.xyz type=A ALLOWED
+2024-01-15 16:37:13 DNS QUERY src=10.0.0.52 dst=8.8.8.8:53 proto=UDP qname=dGVudHMtZnJvbS1hY2NvdW50aW5nLWRl.exfil-c2.xyz type=A ALLOWED
+2024-01-15 16:37:18 DNS QUERY src=10.0.0.52 dst=8.8.8.8:53 proto=UDP qname=cGFydG1lbnQtcS0zLTIwMjQtZmluYW5j.exfil-c2.xyz type=A ALLOWED
+2024-01-15 16:37:23 DNS QUERY src=10.0.0.52 dst=8.8.8.8:53 proto=UDP qname=aWFsLXJlcG9ydC14bHN4.exfil-c2.xyz type=A ALLOWED
+[... 47 similar queries at ~5-second intervals ...]
+2024-01-15 16:47:01 DNS QUERY src=10.0.0.52 dst=8.8.8.8:53 proto=UDP qname=ZW5kLW9mLXRyYW5zbWlzc2lvbg.exfil-c2.xyz type=A ALLOWED
+
+Decoded subdomains (Base64):
+  "this-is-the-first-chunk"
+  "of-confidential-file-con"
+  "tents-from-accounting-de"
+  "partment-q-3-2024-financ"
+  "ial-report-xlsx"
+  ... [47 total segments]
+  "end-of-transmission"
+
+--- Traffic Statistics ---
+Total DNS queries to exfil-c2.xyz : 52 queries over 10 minutes
+Average subdomain length           : 38 characters
+Total estimated data encoded       : ~18KB (Q3-2024 financial report)
+External domain registered         : 3 days ago via anonymous registrar
+DNS resolver responses             : All NXDOMAIN (typical for DNS exfil — no real IP needed)
+
+--- Host Activity (ACCOUNTING-PC-03) ---
+2024-01-15 16:33:21 File access: \\FILESERVER01\Finance\Reports\Q3-2024-Financial.xlsx (READ)
+2024-01-15 16:34:05 Process: python3.exe spawned by cmd.exe
+2024-01-15 16:34:07 File written: C:\Users\mwilson\AppData\Local\Temp\~tmp8473.py
+2024-01-15 16:37:02 DNS exfiltration begins
+
+--- User Context ---
+mwilson role         : Accounts Payable Clerk
+mwilson clearance    : Access to Finance share (read-only)
+Anomaly              : mwilson does not normally run Python scripts
+Last IT ticket       : None in 90 days

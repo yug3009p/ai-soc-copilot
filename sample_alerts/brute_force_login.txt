@@ -1,0 +1,30 @@
+=== SPLUNK ALERT: Brute Force Login — Threshold Exceeded ===
+Alert Time : 2024-01-15 14:23:58 UTC
+Source Host: DC01.corp.local (10.0.0.5)
+Alert Rule : >40 EventCode=4625 from single source IP within 60 seconds
+
+--- Windows Security Event Log (WinEventLog:Security) ---
+2024-01-15 14:23:42 EventCode=4625 Account=administrator Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45 Workstation=UNKNOWN
+2024-01-15 14:23:42 EventCode=4625 Account=administrator Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45 Workstation=UNKNOWN
+2024-01-15 14:23:43 EventCode=4625 Account=administrator Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45 Workstation=UNKNOWN
+2024-01-15 14:23:43 EventCode=4625 Account=administrator Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45 Workstation=UNKNOWN
+2024-01-15 14:23:44 EventCode=4625 Account=administrator Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45 Workstation=UNKNOWN
+[... 43 additional EventCode=4625 entries between 14:23:44 and 14:23:57 ...]
+2024-01-15 14:23:51 EventCode=4625 Account=svc_backup   Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45
+2024-01-15 14:23:52 EventCode=4625 Account=svc_sql      Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45
+2024-01-15 14:23:53 EventCode=4625 Account=jsmith       Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45
+2024-01-15 14:23:54 EventCode=4625 Account=guest        Domain=CORP Logon_Type=3 Failure_Reason="Bad password" Source_IP=203.0.113.45
+2024-01-15 14:23:58 EventCode=4740 Account=administrator Caller_IP=203.0.113.45 Caller_Machine=UNKNOWN (ACCOUNT LOCKED OUT)
+
+--- Threat Intelligence Enrichment ---
+Source IP : 203.0.113.45
+ASN       : AS12345 (HostPalace Web Solution)
+Country   : RU (Russian Federation)
+Reputation: Known brute-force bot (AbuseIPDB score: 98/100)
+Prior hits: 3 other orgs reported this IP this week
+
+--- Summary Statistics ---
+Total EventCode=4625 events : 50 in 16 seconds
+Accounts targeted           : administrator, svc_backup, svc_sql, jsmith, guest
+Target                      : DC01.corp.local (Primary Domain Controller)
+Account locked out          : CORP\administrator at 14:23:58 UTC
