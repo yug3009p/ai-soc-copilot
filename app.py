@@ -14,6 +14,10 @@ BASE_DIR = Path(__file__).parent.resolve()
 ANALYSES_FILE = BASE_DIR / "analyses.json"
 SAMPLE_ALERTS_DIR = BASE_DIR / "sample_alerts"
 
+# Groq retires models over time, so the model is configurable. Set GROQ_MODEL in .env to override.
+GROQ_MODEL = os.getenv("GROQ_MODEL") or "openai/gpt-oss-120b"
+MAX_TOKENS = 4096  # room for the JSON answer plus the model's reasoning tokens
+
 SYSTEM_PROMPT = """You are a senior SOC (Security Operations Center) analyst with 10 years of \
 hands-on experience in threat detection, incident response, and security operations. \
 You have deep expertise in:
@@ -137,8 +141,8 @@ def analyze_alert(alert_text: str) -> dict:
         )
     client = Groq(api_key=api_key)
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        max_tokens=2048,
+        model=GROQ_MODEL,
+        max_tokens=MAX_TOKENS,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {
@@ -790,8 +794,8 @@ def render_sidebar(samples: dict, history: list) -> None:
     # Settings collapsible
     with st.expander("⚙ Settings"):
         st.markdown(
-            '<div style="font-size:0.72rem;color:#6B7280;">Model: llama-3.3-70b-versatile<br>'
-            'Provider: Groq Cloud<br>Max tokens: 2048<br>Format: JSON strict</div>',
+            f'<div style="font-size:0.72rem;color:#6B7280;">Model: {html.escape(GROQ_MODEL)}<br>'
+            f'Provider: Groq Cloud<br>Max tokens: {MAX_TOKENS}<br>Format: JSON strict</div>',
             unsafe_allow_html=True,
         )
 

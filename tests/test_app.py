@@ -99,3 +99,13 @@ def test_sample_alerts_load_with_readable_names():
 
 def test_prompt_treats_alert_as_untrusted():
     assert "untrusted data" in app.SYSTEM_PROMPT
+
+
+def test_model_is_configurable(monkeypatch):
+    import importlib
+
+    monkeypatch.setenv("GROQ_MODEL", "some/other-model")
+    reloaded = importlib.reload(app)
+    assert reloaded.GROQ_MODEL == "some/other-model"
+    monkeypatch.delenv("GROQ_MODEL")
+    assert importlib.reload(app).GROQ_MODEL == "openai/gpt-oss-120b"

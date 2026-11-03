@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-red?style=flat-square&logo=streamlit&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-llama--3.3--70b--versatile-F55036?style=flat-square)
+![Groq](https://img.shields.io/badge/Groq-gpt--oss--120b-F55036?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
@@ -13,7 +13,7 @@
 
 <img src="screenshots/01-dashboard.png" alt="AI-SOC Copilot main dashboard" width="100%">
 
-*Dashboard view — the main interface with the alert input panel and structured analysis output.*
+*Privilege escalation sample: the alert input with the structured analysis beside it. All four screenshots are real runs of the bundled samples (November 2026, `openai/gpt-oss-120b`).*
 
 <img src="screenshots/02-lateral-movement.png" alt="Lateral movement alert analysis" width="100%">
 
@@ -48,13 +48,13 @@ This alert fatigue leads to:
 | Layer | Technology |
 |---|---|
 | UI | Streamlit |
-| AI Engine | Llama 3.3 70B Versatile (Groq) |
+| AI Engine | `openai/gpt-oss-120b` on Groq by default; set `GROQ_MODEL` in `.env` to use another Groq model |
 | SDK | `groq` Python SDK |
 | Config | `python-dotenv` |
 | Language | Python 3.11+ |
 | History | Local `analyses.json` |
 
-**Speed:** Groq's LPU inference hardware delivers sub-second latency on the Llama 3.3 70B model.
+**Speed:** a sample alert took about 3 seconds end to end in testing (one run, November 2026); it depends on the model and Groq's load.
 
 ---
 
