@@ -132,7 +132,15 @@ Failure_Reason="Bad password" Source_IP=203.0.113.45
 
 ## Evaluation
 
-There is no formal evaluation yet. LLM output can be wrong, so treat every result as a draft for an analyst to verify. A labeled evaluation set that measures severity and ATT&CK-mapping accuracy is on the roadmap.
+There is no formal evaluation yet. LLM output can be wrong, so treat every result as a draft for an analyst to verify. For example, a model may claim an IP has a bad reputation even though the app performs no threat-intel lookups. A labeled evaluation set that measures severity and ATT&CK-mapping accuracy is on the roadmap.
+
+What is tested today (`pytest`, run in CI on Ubuntu and Windows) is the code around the model: parsing and validating its JSON, falling back safely when it returns an unexpected severity, escaping its output before rendering, and the analysis history.
+
+## Security notes
+
+- The alert text you paste is sent to Groq. Do not paste logs you are not allowed to share with a third party.
+- Alerts are untrusted data and can carry prompt injection. The prompt tells the model not to follow instructions in the alert, and everything the model returns is HTML-escaped before display.
+- See [SECURITY.md](SECURITY.md) to report a vulnerability.
 
 ---
 
@@ -141,11 +149,15 @@ There is no formal evaluation yet. LLM output can be wrong, so treat every resul
 ```
 ai-soc-copilot/
 ├── app.py               # Main Streamlit application
+├── tests/               # pytest suite for the non-LLM logic
+├── .github/workflows/   # CI: lint + tests
 ├── requirements.txt     # Python dependencies
+├── requirements-dev.txt # pytest, ruff
 ├── .env.example         # API key template
 ├── .gitignore
 ├── LICENSE
 ├── README.md
+├── SECURITY.md · CONTRIBUTING.md · CHANGELOG.md
 ├── screenshots/
 └── sample_alerts/
     ├── brute_force_login.txt
