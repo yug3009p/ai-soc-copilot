@@ -24,3 +24,5 @@ analyses.json
 .DS_Store
 Thumbs.db
 desktop.ini
+.pytest_cache/
+.ruff_cache/
