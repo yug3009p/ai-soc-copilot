@@ -1,6 +1,6 @@
 # 🛡️ AI-SOC Copilot
 
-> AI-powered security alert triage that turns raw logs into actionable intelligence in under 2 minutes.
+> AI-assisted security alert triage: paste a raw alert, get a structured first-pass analysis with severity, MITRE ATT&CK mapping, recommended actions and Splunk SPL hunt queries.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-red?style=flat-square&logo=streamlit&logoColor=white)
@@ -31,7 +31,7 @@
 
 ## Why This Project
 
-SOC analysts face an average of **1,000+ alerts per day**. Traditional triage requires an analyst to manually cross-reference event codes, look up MITRE ATT&CK mappings, formulate investigation queries, and document findings — a process that takes **10–20 minutes per alert** even for experienced analysts.
+SOC analysts receive far more alerts than they can investigate in depth. Triage means manually cross-referencing event codes, looking up MITRE ATT&CK mappings, writing investigation queries and documenting findings: repetitive work that slows response.
 
 This alert fatigue leads to:
 - Critical threats buried under noise
@@ -39,7 +39,7 @@ This alert fatigue leads to:
 - Slower mean-time-to-respond (MTTR)
 - Inconsistent triage quality across skill levels
 
-**AI-SOC Copilot** solves this by acting as a senior analyst co-pilot: paste any raw alert, get a structured, expert-level analysis in seconds. Junior analysts get guidance; senior analysts save time. Everyone responds faster.
+**AI-SOC Copilot** is a first-pass assistant for that work: paste a raw alert and get a structured analysis to review. The analyst still makes the call; the tool drafts the lookups, mappings and queries.
 
 ---
 
@@ -118,45 +118,37 @@ Failure_Reason="Bad password" Source_IP=203.0.113.45
 2024-01-15 14:23:58 EventCode=4740 Account=administrator (ACCOUNT LOCKED OUT)
 ```
 
-**AI output:**
+**AI output** (illustrative; LLM responses vary between runs):
 
 | Field | Result |
 |---|---|
 | **Severity** | 🔴 Critical |
-| **Summary** | An external IP (203.0.113.45) launched a credential brute-force attack against the domain controller, targeting the built-in administrator account. 50 failed logon attempts in 16 seconds triggered an account lockout. The source IP is a known malicious host (AbuseIPDB score: 98/100). |
+| **Summary** | An external IP (203.0.113.45) launched a credential brute-force attack against the domain controller, targeting the built-in administrator account. 50 failed logon attempts in 16 seconds triggered an account lockout. |
 | **MITRE** | T1110.001 — Brute Force: Password Guessing (Credential Access) |
 | **Actions** | Block 203.0.113.45 at perimeter firewall; investigate for successful logons; check all locked accounts; review DC event logs for EventCode=4624 post-lockout |
 | **SPL Query** | `index=wineventlog EventCode=4625 src_ip=203.0.113.45 \| timechart span=1s count` |
 
 ---
 
-## Metrics
+## Evaluation
 
-Based on internal testing across 50 sample alerts:
-
-| Metric | Before | After |
-|---|---|---|
-| Mean alert triage time | ~15 min | **< 2 min** |
-| MITRE mapping accuracy | Manual lookup | Automated |
-| SPL query generation | ~5 min | **Instant** |
-| Junior analyst confidence | Low | Significantly improved |
-
-> _Reduces mean alert triage time from ~15 min to <2 min based on internal testing._
+There is no formal evaluation yet. LLM output can be wrong, so treat every result as a draft for an analyst to verify. A labeled evaluation set that measures severity and ATT&CK-mapping accuracy is on the roadmap.
 
 ---
 
 ## Project Structure
 
 ```
-project-1-ai-soc-copilot/
+ai-soc-copilot/
 ├── app.py               # Main Streamlit application
 ├── requirements.txt     # Python dependencies
 ├── .env.example         # API key template
 ├── .gitignore
+├── LICENSE
 ├── README.md
+├── screenshots/
 └── sample_alerts/
     ├── brute_force_login.txt
-    ├── suspicious_powershell.txt
     ├── dns_exfiltration.txt
     ├── privilege_escalation.txt
     └── lateral_movement.txt
@@ -174,4 +166,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 **Yug Mukesh Patel**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/yug-patel-b9727226b/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/yugpatel9409/)
